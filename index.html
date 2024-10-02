@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>疑似ツイッター（プロキシサービス）</title>
+    <!-- ファビコンとiOS用アイコンを指定 -->
+    <link id="favicon" rel="icon" href="https://upload.wikimedia.org/wikipedia/commons/thumb/e/ed/Antu_im-twitter.svg/640px-Antu_im-twitter.svg.png">
+    <link id="apple-touch-icon" rel="apple-touch-icon" href="https://upload.wikimedia.org/wikipedia/commons/thumb/c/cf/Font_Awesome_5_brands_Twitter_square.svg/640px-Font_Awesome_5_brands_Twitter_square.svg.png" sizes="180x180">
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -13,6 +16,12 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        body.dark-mode {
+            background-color: #15202b;
+            color: #ffffff;
         }
 
         header {
@@ -21,9 +30,12 @@
             width: 100%;
             text-align: center;
             padding: 10px 0;
+            position: fixed;
+            top: 0;
+            z-index: 1000;
         }
 
-        .logo {
+        header img.logo {
             width: 50px;
             height: 50px;
             vertical-align: middle;
@@ -39,6 +51,7 @@
             max-width: 600px;
             width: 100%;
             padding: 20px;
+            margin-top: 70px;
             box-sizing: border-box;
         }
 
@@ -47,10 +60,12 @@
             color: white;
             padding: 10px;
             border: none;
-            border-radius: 5px;
+            border-radius: 20px;
             cursor: pointer;
             font-size: 16px;
             margin-top: 10px;
+            width: 100%;
+            text-align: center;
         }
 
         .button:hover {
@@ -62,17 +77,19 @@
             height: 100px;
             padding: 10px;
             border: 1px solid #ccd6dd;
-            border-radius: 5px;
+            border-radius: 20px;
             margin-top: 10px;
             font-size: 14px;
+            box-sizing: border-box;
         }
 
         input[type="text"] {
             width: calc(100% - 22px);
             padding: 10px;
             border: 1px solid #ccd6dd;
-            border-radius: 5px;
+            border-radius: 20px;
             margin-top: 10px;
+            box-sizing: border-box;
         }
 
         .hidden {
@@ -83,17 +100,53 @@
             margin-top: 20px;
             color: #657786;
         }
+
+        /* ダークモード用のスタイル */
+        body.dark-mode header {
+            background-color: #192734;
+        }
+
+        body.dark-mode .button {
+            background-color: #192734;
+            color: #ffffff;
+        }
+
+        body.dark-mode textarea, 
+        body.dark-mode input[type="text"] {
+            background-color: #253341;
+            color: #ffffff;
+            border-color: #38444d;
+        }
+
+        /* スマホ版対応 */
+        @media (max-width: 600px) {
+            header img.logo {
+                width: 40px;
+                height: 40px;
+            }
+
+            h1 {
+                font-size: 20px;
+            }
+
+            .button {
+                font-size: 14px;
+                padding: 8px;
+            }
+        }
     </style>
 </head>
 <body>
     <header>
-        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a3/Twitter_bird_logo.svg/640px-Twitter_bird_logo.svg.png" alt="Twitter Logo" class="logo">
+        <!-- 初期状態ではライトモードのロゴ -->
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a3/Twitter_bird_logo.svg/172px-Twitter_bird_logo.svg.png?20230420150203" alt="Light Mode Logo" class="logo" id="headerLogo">
         <h1>疑似ツイッター</h1>
     </header>
 
     <main>
         <div class="tweet-section">
             <button id="tweetButton" class="button">ツイートを作成</button>
+            <!-- ツイート入力欄を最初は非表示 -->
             <div id="tweetInputContainer" class="hidden">
                 <textarea id="tweetText" placeholder="今どうしてる？"></textarea>
                 <button id="postTweet" class="button">ツイートする</button>
@@ -102,8 +155,14 @@
 
         <div class="search-section">
             <h2>Twitter 検索</h2>
+            <!-- 検索クエリを入力するテキストボックス -->
             <input type="text" id="searchQuery" placeholder="検索する内容を入力">
             <button id="searchButton" class="button">検索する</button>
+        </div>
+
+        <div class="theme-toggle-section">
+            <!-- ダークモードの切り替えボタン -->
+            <button id="toggleDarkMode" class="button">ダークモード切替</button>
         </div>
     </main>
 
@@ -115,6 +174,7 @@
         // ツイート入力欄の表示切り替え
         document.getElementById('tweetButton').addEventListener('click', function() {
             const tweetInputContainer = document.getElementById('tweetInputContainer');
+            // hiddenクラスの有無で表示・非表示を切り替え
             if (tweetInputContainer.classList.contains('hidden')) {
                 tweetInputContainer.classList.remove('hidden');
             } else {
@@ -127,7 +187,14 @@
             const tweetText = document.getElementById('tweetText').value;
             if (tweetText.trim() !== "") {
                 const tweetUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}`;
-                window.open(tweetUrl, '_blank');
+
+                // ツイート内容をポップアップウィンドウで開く
+                const tweetPopup = window.open(tweetUrl, 'tweetWindow', 'width=600,height=400');
+
+                // ポップアップがブロックされた場合は新しいタブで開く
+                if (!tweetPopup || tweetPopup.closed || typeof tweetPopup.closed == 'undefined') {
+                    window.open(tweetUrl, '_blank');
+                }
             } else {
                 alert('ツイート内容を入力してください。');
             }
@@ -138,9 +205,42 @@
             const searchQuery = document.getElementById('searchQuery').value;
             if (searchQuery.trim() !== "") {
                 const searchUrl = `https://twitter.com/search?q=${encodeURIComponent(searchQuery)}`;
-                window.open(searchUrl, '_blank');
+
+                // 検索結果をポップアップウィンドウで開く
+                const searchPopup = window.open(searchUrl, 'searchWindow', 'width=600,height=400');
+
+                // ポップアップがブロックされた場合は新しいタブで開く
+                if (!searchPopup || searchPopup.closed || typeof searchPopup.closed == 'undefined') {
+                    window.open(searchUrl, '_blank');
+                }
             } else {
                 alert('検索内容を入力してください。');
+            }
+        });
+
+        // ダークモードの切り替え
+        document.getElementById('toggleDarkMode').addEventListener('click', function() {
+            document.body.classList.toggle('dark-mode');
+
+            // ダークモードかどうかを確認
+            const isDarkMode = document.body.classList.contains('dark-mode');
+
+            // ロゴ、ファビコン、iOSアイコンの切り替え
+            const logo = document.getElementById('headerLogo');
+            const favicon = document.getElementById('favicon');
+            const appleTouchIcon = document.getElementById('apple-touch-icon');
+
+            // ダークモードの場合、ダークテーマのアイコンを設定
+            if (isDarkMode) {
+                logo.src = "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6f/Logo_of_Twitter.svg/512px-Logo_of_Twitter.svg.png?20220821125553"; // ダークモード用ロゴ
+                favicon.href = "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ed/Antu_im-twitter.svg/640px-Antu_im-twitter.svg.png"; // ダークモード用ファビコン
+                appleTouchIcon.href = "https://upload.wikimedia.org/wikipedia/commons/thumb/c/cf/Font_Awesome_5_brands_Twitter_square.svg/640px-Font_Awesome_5_brands_Twitter_square.svg.png"; // ダークモード用iOSアイコン
+            } 
+            // ライトモードの場合、ライトテーマのアイコンに戻す
+            else {
+                logo.src = "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a3/Twitter_bird_logo.svg/172px-Twitter_bird_logo.svg.png?20230420150203"; // ライトモード用ロゴ
+                favicon.href = "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ed/Antu_im-twitter.svg/640px-Antu_im-twitter.svg.png"; // ライトモード用ファビコン
+                appleTouchIcon.href = "https://upload.wikimedia.org/wikipedia/commons/thumb/c/cf/Font_Awesome_5_brands_Twitter_square.svg/640px-Font_Awesome_5_brands_Twitter_square.svg.png"; // ライトモード用iOSアイコン
             }
         });
     </script>
