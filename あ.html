@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>疑似ツイッター（プロキシサービス）</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f8fa;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        header {
+            background-color: #1da1f2;
+            color: white;
+            width: 100%;
+            text-align: center;
+            padding: 10px 0;
+        }
+
+        .logo {
+            width: 50px;
+            height: 50px;
+            vertical-align: middle;
+        }
+
+        h1 {
+            display: inline;
+            font-size: 24px;
+            margin-left: 10px;
+        }
+
+        main {
+            max-width: 600px;
+            width: 100%;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .button {
+            background-color: #1da1f2;
+            color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+
+        .button:hover {
+            background-color: #1a91da;
+        }
+
+        textarea {
+            width: 100%;
+            height: 100px;
+            padding: 10px;
+            border: 1px solid #ccd6dd;
+            border-radius: 5px;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+
+        input[type="text"] {
+            width: calc(100% - 22px);
+            padding: 10px;
+            border: 1px solid #ccd6dd;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        footer {
+            margin-top: 20px;
+            color: #657786;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a3/Twitter_bird_logo.svg/640px-Twitter_bird_logo.svg.png" alt="Twitter Logo" class="logo">
+        <h1>疑似ツイッター</h1>
+    </header>
+
+    <main>
+        <div class="tweet-section">
+            <button id="tweetButton" class="button">ツイートを作成</button>
+            <div id="tweetInputContainer" class="hidden">
+                <textarea id="tweetText" placeholder="今どうしてる？"></textarea>
+                <button id="postTweet" class="button">ツイートする</button>
+            </div>
+        </div>
+
+        <div class="search-section">
+            <h2>Twitter 検索</h2>
+            <input type="text" id="searchQuery" placeholder="検索する内容を入力">
+            <button id="searchButton" class="button">検索する</button>
+        </div>
+    </main>
+
+    <footer>
+        <p>©こっちゃんカンパニー</p>
+    </footer>
+
+    <script>
+        // ツイート入力欄の表示切り替え
+        document.getElementById('tweetButton').addEventListener('click', function() {
+            const tweetInputContainer = document.getElementById('tweetInputContainer');
+            if (tweetInputContainer.classList.contains('hidden')) {
+                tweetInputContainer.classList.remove('hidden');
+            } else {
+                tweetInputContainer.classList.add('hidden');
+            }
+        });
+
+        // ツイートをTwitterに送信
+        document.getElementById('postTweet').addEventListener('click', function() {
+            const tweetText = document.getElementById('tweetText').value;
+            if (tweetText.trim() !== "") {
+                const tweetUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}`;
+                window.open(tweetUrl, '_blank');
+            } else {
+                alert('ツイート内容を入力してください。');
+            }
+        });
+
+        // 検索機能
+        document.getElementById('searchButton').addEventListener('click', function() {
+            const searchQuery = document.getElementById('searchQuery').value;
+            if (searchQuery.trim() !== "") {
+                const searchUrl = `https://twitter.com/search?q=${encodeURIComponent(searchQuery)}`;
+                window.open(searchUrl, '_blank');
+            } else {
+                alert('検索内容を入力してください。');
+            }
+        });
+    </script>
+</body>
+</html>
